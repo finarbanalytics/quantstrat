@@ -540,6 +540,7 @@ apply.paramset <- function(strategy.st
         results <- new.env()
         results$error <-list()
         results$cumPL <- xts()
+        results$tradeStats <- c()
         
         for(i in 1:length(args))
         {
@@ -583,11 +584,7 @@ apply.paramset <- function(strategy.st
                   r$tradeStats <- data.frame(r$portfolio.st,t(rep(0,length(tmpnames)-1)))
                   colnames(r$tradeStats) <- tmpnames
                 }
-                if(is.null(results$tradeStats)){
-                  results$tradeStats <- cbind(r$param.combo, r$tradeStats)
-                } else {
-                  results$tradeStats <- rbind(results$tradeStats, cbind(r$param.combo, r$tradeStats))
-                }
+                results$tradeStats <- append(results$tradeStats, cbind(r$param.combo, r$tradeStats))
               }
               
               if(!is.null(r$cumPL)){

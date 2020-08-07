@@ -540,7 +540,6 @@ apply.paramset <- function(strategy.st
         results <- new.env()
         results$error <-list()
         results$cumPL <- xts()
-        results$tradeStats <- c()
         
         for(i in 1:length(args))
         {
@@ -565,7 +564,14 @@ apply.paramset <- function(strategy.st
                 # calculate tradeStats on portfolio
                 updatePortf(r$portfolio.st, Symbols = symbols, ...)
                 r$tradeStats <- tradeStats(r$portfolio.st,Dates = perf.subset, ...)
-
+                if (!is.data.frame(r$tradeStats)) {
+                  next
+                } else if(nrow(r$tradeStats) ==0){
+                  next
+                }else if(ncol(r$tradeStats) < 5){
+                  next
+                }
+                
                 r$cumPL <- cumsum(r$portfolio.st[,'Net.Trading.PL'])
                 if(!is.null(perf.subset)) r$cumPL <- r$cumPL[perf.subset]
                 colnames(r$cumPL) <- portfolio.st
@@ -584,7 +590,11 @@ apply.paramset <- function(strategy.st
                   r$tradeStats <- data.frame(r$portfolio.st,t(rep(0,length(tmpnames)-1)))
                   colnames(r$tradeStats) <- tmpnames
                 }
-                results$tradeStats <- append(results$tradeStats, cbind(r$param.combo, r$tradeStats))
+                if(is.null(results$tradeStats)){
+                  results$tradeStats <- cbind(r$param.combo, r$tradeStats)
+                } else {
+                  results$tradeStats <- rbind(results$tradeStats, cbind(r$param.combo, r$tradeStats))
+                }
               }
               
               if(!is.null(r$cumPL)){
